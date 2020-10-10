@@ -1,0 +1,96 @@
+/**
+*
+* {{properCase name }}
+*
+*/
+
+{{#if wantReduxSaga}}
+import React, { useEffect, useState } from 'react';
+{{else}}
+import React from 'react';
+{{/if}}
+import PropTypes from 'prop-types';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
+{{#if wantHeaders}}
+import { Helmet } from 'react-helmet';
+{{/if}}
+{{#if wantReduxSaga}}
+import { createStructuredSelector } from 'reselect';
+import { useInjectSaga } from 'utils/injectSaga';
+import { useInjectReducer } from 'utils/injectReducer';
+import makeSelect{{properCase name}} from './selectors';
+import reducer from './reducer';
+import saga from './saga';
+import { get } from './actions';
+{{/if}}
+
+export function {{ properCase name }}({{#if wantReduxSaga}}props{{/if}}) {
+{{#if wantReduxSaga}}
+const { {{ camelCase name }}, onGet } = props;
+const [posts, setPosts] = useState([]);
+useInjectReducer({ key: '{{ camelCase name }}', reducer });
+useInjectSaga({ key: '{{ camelCase name }}', saga });
+
+useEffect(() => {
+onGet();
+}, []);
+
+useEffect(() => {
+if ({{ camelCase name }}) {
+setPosts({{ camelCase name }}.data);
+}
+}, [{{ camelCase name }}]);
+
+{{/if}}
+
+return (
+<div>
+  {{#if wantHeaders}}
+  <Helmet>
+    <title>{{properCase name}}</title>
+    <meta name="description" content="Description of {{properCase name}}" />
+  </Helmet>
+  {{/if}}
+  {{#if wantReduxSaga}}
+  <ul>
+    {posts ? posts.map(item => <li key={item.id}>{item.title}</li>) : null}
+  </ul>
+  {{else}}
+  <h1>{{ properCase name }} right here !</h1>
+  {{/if}}
+</div>
+);
+}
+
+{{ properCase name }}.propTypes = {
+{{#if wantReduxSaga}}
+{{ camelCase name }}: PropTypes.object,
+onGet: PropTypes.func,
+{{else}}
+//{{ camelCase name }}: PropTypes.object,
+{{/if}}
+};
+
+{{#if wantReduxSaga}}
+const mapStateToProps = createStructuredSelector({
+{{ camelCase name }}: makeSelect{{properCase name}}(),
+});
+{{/if}}
+
+function mapDispatchToProps(dispatch) {
+return {
+dispatch,
+{{#if wantReduxSaga}}
+onGet: () => dispatch(get()),
+{{/if}}
+};
+}
+
+{{#if wantReduxSaga}}
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+{{else}}
+const withConnect = connect(null, mapDispatchToProps);
+{{/if}}
+
+export default compose(withConnect)({{properCase name}});
